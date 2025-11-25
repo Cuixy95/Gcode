@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绕线机代码生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f7f7f7;
+            padding: 10px;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #5B9BD5, #4171B8);
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .form-section {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #5B9BD5;
+        }
+        
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        
+        .form-row label {
+            min-width: 80px;
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .form-row input[type="number"],
+        .form-row input[type="text"] {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 0;
+        }
+        
+        .tip {
+            color: #666;
+            font-size: 11px;
+            min-width: 120px;
+        }
+        
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+        }
+        
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .checkbox-label {
+            font-weight: normal;
+            font-size: 13px;
+            margin: 0;
+        }
+        
+        .filename-section {
+            padding: 12px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+        
+        .filename-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .filename-row label {
+            min-width: 80px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .filename-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .filename-tip {
+            color: #666;
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .button-section {
+            padding: 12px;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #5B9BD5, #4171B8);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .generate-btn:active {
+            transform: scale(0.98);
+            background: linear-gradient(135deg, #4171B8, #5B9BD5);
+        }
+        
+        .error {
+            color: #ff4444;
+            font-size: 12px;
+            text-align: center;
+            margin: 8px 0;
+            display: none;
+        }
+        
+        .success {
+            color: #00C851;
+            font-size: 12px;
+            text-align: center;
+            margin: 8px 0;
+            display: none;
+        }
+        
+        /* 紧凑的两列布局 */
+        .compact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .compact-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .compact-item label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .compact-item input {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .compact-tip {
+            color: #666;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 5px;
+                font-size: 13px;
+            }
+            
+            .compact-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .form-row label {
+                min-width: auto;
+            }
+            
+            .form-row input {
+                width: 100%;
+            }
+            
+            .tip {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>绕线机代码生成器</h1>
+        </div>
+        
+        <div class="form-section">
+            <div class="section-title">基础参数</div>
+            
+            <div class="compact-grid">
+                <div class="compact-item">
+                    <label>线径 (mm)</label>
+                    <input type="number" id="wire_dia" step="0.01" placeholder="0.00">
+                    <div class="compact-tip">绑制线单圈宽度</div>
+                </div>
+                
+                <div class="compact-item">
+                    <label>总层数</label>
+                    <input type="number" id="layers" placeholder="0">
+                    <div class="compact-tip">等于绑制层数</div>
+                </div>
+                
+                <div class="compact-item">
+                    <label>层宽度</label>
+                    <input type="number" id="width_default" step="0.01" placeholder="0.00">
+                    <div class="compact-tip">单层宽度</div>
+                </div>
+                
+                <div class="compact-item">
+                    <label>默认速度</label>
+                    <input type="number" id="feed_default" placeholder="1000">
+                    <div class="compact-tip">建议1000</div>
+                </div>
+            </div>
+            
+            <div class="checkbox-row">
+                <input type="checkbox" id="negative_start" checked>
+                <label class="checkbox-label">尾部开始</label>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="section-title">其它参数</div>
+            
+            <div class="form-row">
+                <label>暂停层号</label>
+                <input type="text" id="pause_layers" placeholder="1+2+3">
+                <div class="tip">打底层号，用+分隔</div>
+            </div>
+            
+            <div class="checkbox-row">
+                <input type="checkbox" id="pause_mid_layer">
+                <label class="checkbox-label">打底一半时暂停</label>
+            </div>
+            
+            <div class="form-row">
+                <label>特殊层</label>
+                <input type="text" id="layer_settings" placeholder="1=5=F500">
+                <div class="tip">例: 1=5=F500/2=6=F600</div>
+            </div>
+            
+            <div class="form-row">
+                <label>结束位置</label>
+                <input type="number" id="end_stay_dist" value="45" step="1">
+                <div class="tip">推荐45mm</div>
+            </div>
+        </div>
+        
+        <div class="filename-section">
+            <div class="filename-row">
+                <label>文件名</label>
+                <input type="text" id="filename" class="filename-input" value="绕线机代码" placeholder="输入文件名">
+            </div>
+            <div class="filename-tip">文件将保存为 .TXT 格式</div>
+        </div>
+        
+        <div class="button-section">
+            <div class="error" id="errorMessage"></div>
+            <div class="success" id="successMessage"></div>
+            
+            <button class="generate-btn" onclick="generateAndSave()">生成并保存</button>
+        </div>
+    </div>
+
+    <script>
+        // 显示错误信息
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+        }
+
+        // 显示成功信息
+        function showSuccess(message) {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+        }
+
+        // 解析暂停层号
+        function parsePauseLayers(s, totalLayers) {
+            if (!s || !s.trim()) {
+                return [];
+            }
+            const layers = [];
+            const parts = s.split("+");
+            for (const part of parts) {
+                try {
+                    const n = parseInt(part.trim());
+                    if (n >= 1 && n <= totalLayers) {
+                        layers.push(n);
+                    }
+                } catch (e) {
+                    // 忽略解析错误
+                }
+            }
+            return [...new Set(layers)].sort((a, b) => a - b);
+        }
+
+        // 解析特殊层设置
+        function parseLayerSettings(s) {
+            const result = {};
+            if (!s || !s.trim()) {
+                return result;
+            }
+            const chunks = s.trim().split("/").filter(chunk => chunk.trim());
+            for (const chunk of chunks) {
+                try {
+                    const [idx, width, feed] = chunk.split("=");
+                    const layer = parseInt(idx.trim());
+                    const w = parseFloat(width.trim());
+                    let fstr = feed.trim().toUpperCase();
+                    if (!fstr.startsWith("F")) {
+                        fstr = "F" + fstr;
+                    }
+                    const f = parseInt(fstr.replace("F", ""));
+                    result[layer] = { width: w, feed: f };
+                } catch (e) {
+                    // 忽略解析错误
+                }
+            }
+            return result;
+        }
+
+        // 解析浮点数
+        function parseFloatValue(s, defaultValue = 0) {
+            try {
+                return parseFloat(s);
+            } catch (e) {
+                return defaultValue;
+            }
+        }
+
+        // 生成G代码
+        function generateGCode(params, negativeStart, pauseMidLayer) {
+            const wire_dia = params.wire_dia;
+            const layers = params.layers;
+            const width_default = params.width_default;
+            const feed_default = params.feed_default;
+            const pause_layers = params.pause_layers;
+            const layer_settings = params.layer_settings;
+            const end_stay_dist = params.end_stay_dist || 0;
+
+            let gcode_lines = [];
+            gcode_lines.push(";绕线机代码生成器 v3");
+            gcode_lines.push("G21 ; 设置单位为毫米");
+            gcode_lines.push("G91 ; 相对坐标");
+            gcode_lines.push("; ========== 绕线开始 ==========");
+
+            let x_pos = 0;
+            let y_pos = 0.0;
+            let dir = negativeStart ? -1 : 1;
+
+            for (let layer = 1; layer <= layers; layer++) {
+                let layer_width, layer_feed;
+                if (layer_settings[layer]) {
+                    layer_width = layer_settings[layer].width;
+                    layer_feed = layer_settings[layer].feed;
+                } else {
+                    layer_width = width_default;
+                    layer_feed = feed_default;
+                }
+
+                const turns = Math.floor(layer_width / wire_dia);
+                gcode_lines.push(`; -- 第${layer}层，宽度${layer_width}mm，速度F${layer_feed}`);
+
+                // 除了第一层以外每层换向
+                if (layer > 1) {
+                    dir = -dir;
+                }
+
+                for (let turn = 0; turn < turns; turn++) {
+                    x_pos += 1;
+                    y_pos += dir * wire_dia;
+                    gcode_lines.push(
+                        `G1 X1 Y${(dir * wire_dia).toFixed(3)} F${layer_feed} ; 第${layer}层 第${turn+1}圈`
+                    );
+                    
+                    // 层的中间暂停点
+                    if (pause_layers.includes(layer) && pauseMidLayer && turn === Math.floor(turns / 2)) {
+                        gcode_lines.push("");
+                        gcode_lines.push("; -------- 暂停分割线 --------");
+                        gcode_lines.push("M0 ; 暂停等待，");
+                        gcode_lines.push("$MD ; 电机除能");
+                        gcode_lines.push("M0 ; 电机除能后暂停");
+                        gcode_lines.push("; --------------------------");
+                        gcode_lines.push("");
+                    }
+                }
+                
+                // 层结束暂停点
+                if (pause_layers.includes(layer) && !pauseMidLayer) {
+                    gcode_lines.push("");
+                    gcode_lines.push("; -------- 暂停分割线 --------");
+                    gcode_lines.push("M0 ; 暂停等待，");
+                    gcode_lines.push("$MD ; 电机除能");
+                    gcode_lines.push("M0 ; 电机除能后暂停");
+                    gcode_lines.push("; --------------------------");
+                    gcode_lines.push("");
+                }
+            }
+
+            gcode_lines.push("; ==== 绕线结束 ====");
+            gcode_lines.push("G90 ; 恢复绝对坐标");
+            gcode_lines.push("M0 ; 绕线结束暂停");
+            gcode_lines.push("$MD ; 电机除能");
+            gcode_lines.push("M0 ; 除能后暂停");
+            if (end_stay_dist > 0) {
+                gcode_lines.push(`G1 Y${end_stay_dist.toFixed(3)} F3000 ; 结束停留到Y=${end_stay_dist.toFixed(3)}mm`);
+            }
+            gcode_lines.push("; ==== Gcode完成 ====");
+
+            return gcode_lines.join("\n");
+        }
+
+        // 生成并保存G代码
+        function generateAndSave() {
+            // 获取输入值
+            const wire_dia = document.getElementById('wire_dia').value;
+            const layers = document.getElementById('layers').value;
+            const width_default = document.getElementById('width_default').value;
+            const feed_default = document.getElementById('feed_default').value;
+            const pause_layers = document.getElementById('pause_layers').value;
+            const layer_settings = document.getElementById('layer_settings').value;
+            const end_stay_dist = document.getElementById('end_stay_dist').value;
+            const negative_start = document.getElementById('negative_start').checked;
+            const pause_mid_layer = document.getElementById('pause_mid_layer').checked;
+            let filename = document.getElementById('filename').value.trim();
+
+            // 验证必填项
+            if (!wire_dia || !layers || !width_default || !feed_default) {
+                showError("请填写所有必填项");
+                return;
+            }
+
+            // 验证文件名
+            if (!filename) {
+                showError("请输入文件名");
+                return;
+            }
+
+            // 确保文件名有.txt扩展名
+            if (!filename.toLowerCase().endsWith('.txt')) {
+                filename += '.TXT';
+            }
+
+            try {
+                // 解析参数
+                const wire_dia_val = parseFloat(wire_dia);
+                const layers_val = parseInt(layers);
+                const width_default_val = parseFloat(width_default);
+                const feed_default_val = parseInt(feed_default);
+                const pause_layers_val = parsePauseLayers(pause_layers, layers_val);
+                const layer_settings_val = parseLayerSettings(layer_settings);
+                const end_stay_dist_val = parseFloatValue(end_stay_dist, 0);
+
+                // 验证暂停层号
+                for (const layer of pause_layers_val) {
+                    if (layer > layers_val) {
+                        showError(`暂停层号 ${layer} 不得大于总层数`);
+                        return;
+                    }
+                }
+
+                const params = {
+                    wire_dia: wire_dia_val,
+                    layers: layers_val,
+                    width_default: width_default_val,
+                    feed_default: feed_default_val,
+                    pause_layers: pause_layers_val,
+                    layer_settings: layer_settings_val,
+                    end_stay_dist: end_stay_dist_val
+                };
+
+                // 生成G代码
+                const gcode = generateGCode(params, negative_start, pause_mid_layer);
+                
+                // 保存文件
+                const blob = new Blob([gcode], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showSuccess(`文件 "${filename}" 已生成并开始下载`);
+                
+            } catch (error) {
+                showError("参数输入有误: " + error.message);
+            }
+        }
+
+        // 页面加载时隐藏消息
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
