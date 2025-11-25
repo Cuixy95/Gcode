@@ -248,15 +248,15 @@
             
             <div class="compact-grid">
                 <div class="compact-item">
-                    <label>线径 (mm)</label>
+                    <label>密度/线径 (mm)</label>
                     <input type="number" id="wire_dia" step="0.01" placeholder="0.00">
-                    <div class="compact-tip">绑制线单圈宽度</div>
+                    <div class="compact-tip">数值越小排线越紧密</div>
                 </div>
                 
                 <div class="compact-item">
                     <label>总层数</label>
                     <input type="number" id="layers" placeholder="0">
-                    <div class="compact-tip">等于绑制层数</div>
+                    <div class="compact-tip">绑制层数</div>
                 </div>
                 
                 <div class="compact-item">
@@ -274,7 +274,7 @@
             
             <div class="checkbox-row">
                 <input type="checkbox" id="negative_start" checked>
-                <label class="checkbox-label">尾部开始</label>
+                <label class="checkbox-label">从右往左绑制</label>
             </div>
         </div>
         
@@ -283,7 +283,7 @@
             
             <div class="form-row">
                 <label>暂停层号</label>
-                <input type="text" id="pause_layers" placeholder="1+2+3">
+                <input type="text" id="pause_layers" placeholder="">
                 <div class="tip">打底层号，用+分隔</div>
             </div>
             
@@ -308,7 +308,7 @@
         <div class="filename-section">
             <div class="filename-row">
                 <label>文件名</label>
-                <input type="text" id="filename" class="filename-input" value="绕线机代码" placeholder="输入文件名">
+                <input type="text" id="filename" class="filename-input" value="" placeholder="输入文件名（无需填写.TXT）">
             </div>
             <div class="filename-tip">文件将保存为 .TXT 格式</div>
         </div>
