@@ -271,8 +271,8 @@
             const pauseLayersArr = parsePauseLayers(pauseRaw, totalLayers);
             const specialMap = parseSpecialLayers(specialRaw);
             
-            对于 (让 铺设 在 特殊地图) {
-                如果 (parseInt(lay) > totalLayers) {
+            for (let lay in specialMap) {
+                if (parseInt(lay) > totalLayers) {
                     setStatus(`⚠️ 特殊层 ${lay} 超过总层数 ${totalLayers}`, true);
                     return;
                 }
@@ -285,9 +285,9 @@
             
             // ========== 自动生成文件名 ==========
             let filename = $('fname').value.trim();
-            如果 (文件名 === "") {
-                文件名 = 自动生成文件名(线径, 总层数, 宽度定义);
-                $('fname').value = filename.替换('.txt', '');
+            if (filename === "") {
+                filename = autoGenerateFilename(wireDia, totalLayers, widthDef);
+                $('fname').value = filename.replace('.txt', '');
             }
             if (!filename.toLowerCase().endsWith('.txt')) filename += '.txt';
             
