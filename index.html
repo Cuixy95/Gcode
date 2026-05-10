@@ -3,75 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>绕线机代码生成器 | 自动命名</title>
+    <title>绕线机代码生成器</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, 'Microsoft YaHei', sans-serif; background: #eef2f5; padding: 12px; font-size: 14px; }
-        .container { max-width: 560px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #2c7da0, #1f5068); color: white; text-align: center; padding: 18px 12px; }
-        .header h1 { font-size: 1.4rem; font-weight: 600; }
-        .form-section { padding: 16px 18px; border-bottom: 1px solid #e9ecef; }
-        .section-title { font-size: 0.9rem; font-weight: 700; color: #1f5068; margin-bottom: 12px; padding-left: 6px; border-left: 4px solid #2c7da0; }
-        .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; margin-bottom: 12px; }
-        .compact-item { display: flex; flex-direction: column; gap: 4px; }
-        .compact-item label { font-weight: 600; font-size: 0.75rem; color: #2c3e4e; }
-        .compact-item input { padding: 8px 10px; border: 1px solid #ced4da; border-radius: 12px; font-size: 0.85rem; }
-        .compact-item input:focus { border-color: #2c7da0; outline: none; }
-        .compact-tip { font-size: 0.7rem; color: #6c757d; }
-        .form-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 12px; }
-        .form-row label { min-width: 72px; font-weight: 600; font-size: 0.8rem; }
-        .form-row input { flex: 1; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 12px; font-size: 0.85rem; }
-        .tip { font-size: 0.7rem; color: #6c757d; }
-        .checkbox-row { display: flex; align-items: center; gap: 10px; margin: 10px 0 8px; }
-        input[type="checkbox"] { width: 18px; height: 18px; accent-color: #2c7da0; }
-        .filename-section { background: #f8fafc; padding: 14px 18px; border-top: 1px solid #e2e8f0; }
-        .filename-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .filename-row label { font-weight: 700; font-size: 0.85rem; }
-        .filename-input { flex: 1; padding: 8px 12px; border-radius: 40px; border: 1px solid #cbd5e1; font-size: 0.85rem; }
-        .auto-name-hint { font-size: 0.7rem; color: #2c7da0; margin-top: 6px; text-align: center; cursor: pointer; }
-        .auto-name-hint:hover { text-decoration: underline; }
-        .button-section { padding: 20px 18px; background: white; }
-        .generate-btn { background: linear-gradient(100deg, #2c7da0, #1e5a74); border: none; padding: 12px; font-weight: 700; font-size: 1rem; border-radius: 40px; width: 100%; color: white; cursor: pointer; }
-        .generate-btn:active { transform: scale(0.97); }
-        .status { text-align: center; font-size: 0.8rem; margin-top: 12px; padding: 6px; border-radius: 30px; display: none; }
-        .status.error { background: #ffe3e3; color: #c7362b; }
-        .status.success { background: #e0f2e9; color: #1e6f3f; }
-        @media (max-width: 480px) { .compact-grid { grid-template-columns: 1fr; } .form-row { flex-direction: column; } .form-row label { min-width: auto; } }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, 'Microsoft YaHei', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: #eef2f5;
+            padding: 8px 10px;
+            font-size: 13px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(120deg, #1f6e8c, #0e4b64);
+            color: white;
+            text-align: center;
+            padding: 12px 8px;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .form-section {
+            padding: 8px 14px;
+            border-bottom: 1px solid #eef2f5;
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #1f5068;
+            margin-bottom: 6px;
+            padding-left: 8px;
+            border-left: 3px solid #2c7da0;
+            letter-spacing: -0.2px;
+        }
+
+        .vertical-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .input-item label {
+            font-weight: 600;
+            font-size: 0.68rem;
+            color: #2c3e4e;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .input-item label span {
+            background: #e9ecef;
+            padding: 1px 5px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: normal;
+            color: #2c7da0;
+        }
+
+        .input-item input {
+            padding: 7px 10px;
+            border: 1px solid #dce5ec;
+            border-radius: 14px;
+            font-size: 0.8rem;
+            background: #ffffff;
+            transition: all 0.15s;
+        }
+
+        .input-item input:focus {
+            border-color: #2c7da0;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44, 125, 160, 0.1);
+        }
+
+        .compact-tip {
+            font-size: 0.6rem;
+            color: #6c8a9c;
+            margin-top: 0px;
+            margin-left: 4px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 6px 0 2px;
+            background: #f9fbfd;
+            padding: 5px 8px;
+            border-radius: 16px;
+        }
+
+        .checkbox-row label {
+            font-weight: 500;
+            font-size: 0.7rem;
+            color: #1f5068;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #2c7da0;
+            margin: 0;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-bottom: 8px;
+        }
+
+        .form-row label {
+            font-weight: 600;
+            font-size: 0.68rem;
+            color: #2c3e4e;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .form-row label span {
+            background: #e9ecef;
+            padding: 1px 5px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: normal;
+            color: #6c8a9c;
+        }
+
+        .form-row input {
+            padding: 6px 10px;
+            border: 1px solid #dce5ec;
+            border-radius: 14px;
+            font-size: 0.78rem;
+        }
+
+        .tip {
+            font-size: 0.6rem;
+            color: #6c8a9c;
+            line-height: 1.2;
+        }
+
+        .filename-section {
+            background: #fafcff;
+            padding: 8px 14px;
+            border-top: 1px solid #eef2f5;
+            border-bottom: 1px solid #eef2f5;
+        }
+
+        .filename-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filename-row label {
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: #1f5068;
+        }
+
+        .filename-input {
+            flex: 1;
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #d0dfea;
+            font-size: 0.75rem;
+            background: white;
+        }
+
+        .auto-name-hint {
+            font-size: 0.65rem;
+            color: #2c7da0;
+            margin-top: 4px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .auto-name-hint:hover {
+            text-decoration: underline;
+        }
+
+        .button-section {
+            padding: 12px 14px 16px;
+            background: white;
+        }
+
+        .generate-btn {
+            background: linear-gradient(100deg, #2c7da0, #1a5c78);
+            border: none;
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border-radius: 40px;
+            width: 100%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .generate-btn:active {
+            transform: scale(0.97);
+        }
+
+        .status {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-bottom: 10px;
+            padding: 6px;
+            border-radius: 30px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .status.error {
+            background: #ffe9e9;
+            color: #c7362b;
+        }
+
+        .status.success {
+            background: #e1f3ea;
+            color: #1e6f3f;
+        }
+
+        hr {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px 8px;
+            }
+            .form-section {
+                padding: 6px 12px;
+            }
+            .filename-section {
+                padding: 6px 12px;
+            }
+            .button-section {
+                padding: 10px 12px 14px;
+            }
+            .checkbox-row {
+                margin: 4px 0 2px;
+                padding: 4px 8px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header"><h1>⚙️ 绕线机代码生成器</h1></div>
-    
-    <div class="form-section">
-        <div class="section-title">基础参数</div>
-        <div class="compact-grid">
-            <div class="compact-item"><label>线径 / 密度 (mm)</label><input type="number" id="wdia" step="0.01" value="0.15"><div class="compact-tip">数值越小越紧密</div></div>
-            <div class="compact-item"><label>总层数</label><input type="number" id="layers" value=""><div class="compact-tip">绕制层数</div></div>
-            <div class="compact-item"><label>层宽度 (mm)</label><input type="number" id="width" step="0.1" value=""><div class="compact-tip">单层宽度</div></div>
-            <div class="compact-item"><label>默认速度 F</label><input type="number" id="feed" value="3000"><div class="compact-tip"></div></div>
-        </div>
-        <div class="checkbox-row"><input type="checkbox" id="negStart" checked><label>🔁 从右往左绑制</label></div>
+    <div class="header">
+        <h1>⚙️ 绕线机代码生成器</h1>
     </div>
-    
+
     <div class="form-section">
-        <div class="section-title">高级控制</div>
-        <div class="form-row"><label>⏸️ 暂停层号</label><input type="text" id="pauseLayers" value="1"><div class="tip">用+分隔，例如 1+3</div></div>
+        <div class="section-title">📐 基础参数</div>
+        <div class="vertical-inputs">
+            <div class="input-item">
+                <label>🎯 线径 / 密度 (mm) <span>数值越小越紧密</span></label>
+                <input type="number" id="wdia" step="0.01" value="0.15" placeholder="0.15">
+            </div>
+            <div class="input-item">
+                <label>📚 总层数 <span>绑制层数</span></label>
+                <input type="number" id="layers" value="" placeholder="绕制层数" step="1">
+            </div>
+            <div class="input-item">
+                <label>📏 层宽度 (mm) <span>绕线区域宽度</span></label>
+                <input type="number" id="width" step="0.1" value="" placeholder="排线总宽">
+            </div>
+            <div class="input-item">
+                <label>⚡ 默认速度 F <span>mm/min</span></label>
+                <input type="number" id="feed" value="3000" step="100" placeholder="进给速度">
+            </div>
+        </div>
+
+        <div class="checkbox-row">
+            <input type="checkbox" id="negStart" checked>
+            <label>🔁 从右往左绑制（反向起始）</label>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="section-title">⚙️ 高级控制</div>
         <div class="form-row">
-            <label>📌 Y轴暂停宽度</label>
-            <input type="number" id="pauseYWidth" step="0.1" value="1.0" style="flex:0.5; min-width:80px;">
-            <div class="tip">第一层Y轴移动到该值时暂停 (mm)</div>
+            <label>⏸️ 暂停层号 <span>多层级用 + 分隔</span></label>
+            <input type="text" id="pauseLayers" value="1" placeholder="例: 1+3">
         </div>
-        <div class="checkbox-row"><input type="checkbox" id="pauseAtYWidth" checked><label>启用Y轴宽度暂停</label></div>
-        <div class="form-row"><label>✨ 特殊宽度设置</label><input type="text" id="special" value=""><div class="tip">格式: 层号=宽度=F速度，/分隔</div></div>
-        <div class="form-row"><label>📍 结束停留 Y</label><input type="number" id="endY" value="60" step="1"><div class="tip">绕线结束后Y轴坐标</div></div>
+
+        <div class="form-row">
+            <label>📌 Y轴暂停宽度 (mm) <span>第一层Y移动到该宽度暂停</span></label>
+            <input type="number" id="pauseYWidth" step="0.1" value="2" placeholder="到达该Y值时暂停">
+        </div>
+        <div class="checkbox-row">
+            <input type="checkbox" id="pauseAtYWidth" checked>
+            <label>启用Y轴宽度暂停</label>
+        </div>
+
+        <div class="form-row">
+            <label>✨ 特殊宽度/速度设置 <span>格式: 层号=宽度=F速度，/分隔</span></label>
+            <input type="text" id="special" value="" placeholder="例: 3=5=500">
+        </div>
+
+        <div class="form-row">
+            <label>📍 结束停留 Y (mm) <span>最后一步机头移动至该位置</span></label>
+            <input type="number" id="endY" value="60" step="1" placeholder="绕线结束Y坐标">
+        </div>
     </div>
-    
+
     <div class="filename-section">
-        <div class="filename-row"><label>📄 文件名</label><input type="text" id="fname" class="filename-input" value="" placeholder="留空自动生成"></div>
-        <div class="auto-name-hint" id="autoNamePreview">✨ 预览: 15c4k45.txt</div>
+        <div class="filename-row">
+            <label>📄 文件名</label>
+            <input type="text" id="fname" class="filename-input" placeholder="留空自动命名">
+        </div>
+        <div class="auto-name-hint" id="autoNamePreview">✨ 自动命名预览: 等待参数</div>
     </div>
-    
+
     <div class="button-section">
         <div id="statusMsg" class="status"></div>
         <button class="generate-btn" id="genBtn">📁 生成并保存 G-code</button>
@@ -82,22 +366,19 @@
     (function() {
         const $ = (id) => document.getElementById(id);
         const statusDiv = $('statusMsg');
-        
+
         function setStatus(msg, isError = false) {
             statusDiv.textContent = msg;
             statusDiv.className = `status ${isError ? 'error' : 'success'}`;
             statusDiv.style.display = 'block';
-            if (!isError) setTimeout(() => { if(statusDiv) statusDiv.style.display = 'none'; }, 2800);
+            if (!isError) {
+                setTimeout(() => {
+                    if (statusDiv) statusDiv.style.display = 'none';
+                }, 2500);
+            }
         }
-        function hideStatus() { statusDiv.style.display = 'none'; }
-        
-        function parsePauseLayers(raw, total) {
-            if (!raw || !raw.trim()) return [];
-            return [...new Set(
-                raw.split('+').map(p => parseInt(p.trim())).filter(n => !isNaN(n) && n >= 1 && n <= total)
-            )].sort((a,b)=>a-b);
-        }
-        
+        function hideStatus() { if (statusDiv) statusDiv.style.display = 'none'; }
+
         function parseSpecialLayers(str) {
             const map = {};
             if (!str || !str.trim()) return map;
@@ -111,30 +392,26 @@
                     let feedRaw = parts[2].trim().toUpperCase();
                     if (feedRaw.startsWith('F')) feedRaw = feedRaw.slice(1);
                     const feed = parseInt(feedRaw);
-                    if (!isNaN(layer) && !isNaN(width) && !isNaN(feed) && layer>0) {
+                    if (!isNaN(layer) && !isNaN(width) && !isNaN(feed) && layer > 0 && width > 0 && feed > 0) {
                         map[layer] = { width, feed };
                     }
                 }
             });
             return map;
         }
-        
-        /**
-         * 根据线径、层数、层宽度自动生成文件名
-         * 规则：线径*100 + "c" + 层数 + "k" + 宽度*10 + ".txt"
-         */
+
         function autoGenerateFilename(wireDia, layers, width) {
             let wireCode = Math.round(wireDia * 100);
             let widthCode = Math.round(width * 10);
+            if (wireCode <= 0) wireCode = 1;
+            if (widthCode <= 0) widthCode = 1;
             return `${wireCode}c${layers}k${widthCode}.txt`;
         }
-        
-        // 实时预览自动文件名
+
         function updateFileNamePreview() {
             const wireRaw = $('wdia').value;
             const layersRaw = $('layers').value;
             const widthRaw = $('width').value;
-            
             if (wireRaw && layersRaw && widthRaw) {
                 const wireDia = parseFloat(wireRaw);
                 const layers = parseInt(layersRaw);
@@ -145,162 +422,171 @@
                     return;
                 }
             }
-            $('autoNamePreview').innerHTML = `✨ 自动命名预览: (填写线径/层数/宽度)`;
+            $('autoNamePreview').innerHTML = `✨ 自动命名预览: (填线径/层数/宽度)`;
         }
-        
-        /**
-         * 核心：生成精简Gcode
-         */
+
         function buildGcode(params) {
-            const { wireDia, totalLayers, widthDef, feedDef, specialMap, endStayY, negativeStart, pauseAtYWidth, pauseYWidthValue } = params;
+            const {
+                wireDia,
+                totalLayers,
+                widthDef,
+                feedDef,
+                specialMap,
+                endStayY,
+                negativeStart,
+                pauseAtYWidth,
+                pauseYWidthValue
+            } = params;
+
             const lines = [];
-            lines.push(";绕线机代码 (精简合并版 - Y轴可变宽度暂停)");
-            lines.push("G21 ; 毫米单位");
-            lines.push("G91 ; 相对坐标模式");
-            lines.push("; ========== 开始绕线 ==========");
-            
+            lines.push(";绕线机代码 (超紧凑版 - Y宽度暂停)");
+            lines.push("G21");
+            lines.push("G91");
+            lines.push("; ========== 绕线开始 ==========");
+
             let currentDir = negativeStart ? -1 : 1;
             let totalX = 0;
             let totalY = 0;
-            let pauseInsertedForLayer1 = false;
-            
+            let firstLayerPauseTriggered = false;
+
             for (let lay = 1; lay <= totalLayers; lay++) {
-                let layerW = widthDef, layerF = feedDef;
+                let layerW = widthDef;
+                let layerF = feedDef;
                 if (specialMap[lay]) {
                     layerW = specialMap[lay].width;
                     layerF = specialMap[lay].feed;
                 }
+
                 const turns = Math.floor(layerW / wireDia);
                 if (turns <= 0) {
-                    lines.push(`; 警告: 第${lay}层宽度${layerW} / 线径${wireDia} 圈数为0，跳过`);
+                    lines.push(`; 警告: 第${lay}层宽度不足, 跳过`);
                     continue;
                 }
                 if (lay > 1) currentDir = -currentDir;
-                
-                lines.push(`; -- 层 ${lay} | 宽=${layerW}mm | 圈=${turns} | F${layerF} 方向${currentDir > 0 ? '→' : '←'}`);
-                
-                let batchX = 0;
-                let batchY = 0;
-                let batchSpeed = layerF;
-                
-                let flushBatch = (insertPause = false, pausePosMm = null) => {
+
+                lines.push(`; 层${lay} | 宽=${layerW}mm | 圈=${turns} | F=${layerF} 方向${currentDir>0?'→':'←'}`);
+
+                let batchX = 0, batchY = 0;
+                const flushBatch = () => {
                     if (batchX !== 0 || batchY !== 0) {
-                        lines.push(`G1 X${batchX} Y${batchY.toFixed(4)} F${batchSpeed}`);
+                        lines.push(`G1 X${batchX} Y${batchY.toFixed(5)} F${layerF}`);
                         totalX += batchX;
                         totalY += batchY;
                         batchX = 0;
                         batchY = 0;
                     }
-                    if (insertPause) {
-                        lines.push("", `; ----- Y轴到达${pausePosMm}mm暂停点 -----`, "M0", "$MD", "M0", "; -------------------------------", "");
-                    }
                 };
-                
-                for (let t = 0; t < turns; t++) {
+
+                for (let t = 1; t <= turns; t++) {
                     const yMove = currentDir * wireDia;
                     batchX += 1;
                     batchY += yMove;
-                    
+
                     let needPause = false;
-                    if (pauseAtYWidth && lay === 1 && !pauseInsertedForLayer1) {
+                    if (pauseAtYWidth && lay === 1 && !firstLayerPauseTriggered) {
                         const futureTotalY = totalY + batchY;
                         const currentAbsY = Math.abs(totalY);
                         const futureAbsY = Math.abs(futureTotalY);
                         const targetAbsY = Math.abs(pauseYWidthValue);
-                        if (currentAbsY < targetAbsY && futureAbsY >= targetAbsY) {
+                        if ((currentAbsY < targetAbsY && futureAbsY >= targetAbsY) || 
+                            (Math.abs(futureTotalY) >= targetAbsY - 1e-6 && currentAbsY < targetAbsY)) {
                             needPause = true;
-                            pauseInsertedForLayer1 = true;
+                            firstLayerPauseTriggered = true;
                         }
                     }
-                    
+
                     if (needPause) {
-                        flushBatch(false);
-                        lines.push("", `; -----【Y轴到达${pauseYWidthValue}mm】-----`, "M0", "$MD", "M0", "; --------------------------", "");
+                        flushBatch();
+                        lines.push("", `; ----- Y轴暂停 ${pauseYWidthValue}mm -----`, "M0", "$MD", "M0", "; 确认后继续", "");
                     }
                 }
-                flushBatch(false);
-                lines.push(`; 层 ${lay} 完成 | 累计X=${totalX}圈 | 累计Y=${totalY.toFixed(3)}mm`);
+                flushBatch();
+                lines.push(`; 层${lay}完成 | 累计X=${totalX}圈 | Y=${totalY.toFixed(4)}mm`);
             }
-            
+
             lines.push("; ==== 绕线完成 ====");
-            lines.push("G90 ; 绝对坐标");
-            lines.push("M0 ; 绕线完成暂停");
-            lines.push("$MD ; 电机除能");
-            lines.push("M0 ; 确认停止");
-            if (endStayY > 0) {
-                lines.push(`G1 Y${endStayY.toFixed(3)} F3000 ; 移动至Y=${endStayY.toFixed(3)}mm`);
+            lines.push("G90");
+            lines.push("M0");
+            lines.push("$MD");
+            lines.push("M0");
+            if (endStayY && !isNaN(endStayY) && endStayY !== 0) {
+                lines.push(`G1 Y${endStayY.toFixed(3)} F2000 ; 移至结束Y位置`);
             }
-            lines.push("M30 ; ==== Gcode 结束 ====");
+            lines.push("M30");
             return lines.join("\n");
         }
-        
+
         function generateAndSave() {
             hideStatus();
+
             const wireRaw = $('wdia').value;
             const layersRaw = $('layers').value;
             const widthRaw = $('width').value;
             const feedRaw = $('feed').value;
-            
+
             if (!wireRaw || !layersRaw || !widthRaw || !feedRaw) {
-                setStatus("❌ 请完整填写线径、层数、层宽度、默认速度", true);
+                setStatus("❌ 请完整填写线径、层数、宽度、速度", true);
                 return;
             }
-            
+
             const wireDia = parseFloat(wireRaw);
             const totalLayers = parseInt(layersRaw);
             const widthDef = parseFloat(widthRaw);
             const feedDef = parseInt(feedRaw);
-            
-            if (isNaN(wireDia) || wireDia <= 0 || isNaN(totalLayers) || totalLayers < 1 || isNaN(widthDef) || widthDef <= 0 || isNaN(feedDef) || feedDef <= 0) {
-                setStatus("⚠️ 参数无效: 线径/层数/宽度/速度必须为正数", true);
-                return;
-            }
-            
-            const pauseRaw = $('pauseLayers').value;
+
+            if (isNaN(wireDia) || wireDia <= 0) { setStatus("⚠️ 线径需为正数", true); return; }
+            if (isNaN(totalLayers) || totalLayers < 1) { setStatus("⚠️ 层数≥1", true); return; }
+            if (isNaN(widthDef) || widthDef <= 0) { setStatus("⚠️ 层宽度正数", true); return; }
+            if (isNaN(feedDef) || feedDef <= 0) { setStatus("⚠️ 速度正数", true); return; }
+
             const specialRaw = $('special').value;
-            const endStayY = parseFloat($('endY').value) || 0;
+            let endStayY = parseFloat($('endY').value);
+            if (isNaN(endStayY)) endStayY = 60;
             const negativeStart = $('negStart').checked;
             const pauseAtYWidth = $('pauseAtYWidth').checked;
-            const pauseYWidthValue = parseFloat($('pauseYWidth').value) || 1.0;
-            
-            if (pauseAtYWidth && (pauseYWidthValue <= 0 || isNaN(pauseYWidthValue))) {
-                setStatus("⚠️ 请输入有效的Y轴暂停宽度 (>0)", true);
+            const pauseYWidthValue = parseFloat($('pauseYWidth').value);
+
+            if (pauseAtYWidth && (isNaN(pauseYWidthValue) || pauseYWidthValue <= 0)) {
+                setStatus("⚠️ 启用暂停时宽度须>0", true);
                 return;
             }
-            
-            const pauseLayersArr = parsePauseLayers(pauseRaw, totalLayers);
+
             const specialMap = parseSpecialLayers(specialRaw);
-            
-            for (let lay in specialMap) {
-                if (parseInt(lay) > totalLayers) {
-                    setStatus(`⚠️ 特殊层 ${lay} 超过总层数 ${totalLayers}`, true);
+            for (let layStr in specialMap) {
+                const lay = parseInt(layStr);
+                if (lay > totalLayers) {
+                    setStatus(`⚠️ 特殊层 ${lay} 超出总层数`, true);
                     return;
                 }
-                const sp = specialMap[lay];
-                if (sp.width <= 0 || sp.feed <= 0) {
-                    setStatus(`⚠️ 特殊层 ${lay} 宽度或速度无效`, true);
+                if (specialMap[lay].width <= 0 || specialMap[lay].feed <= 0) {
+                    setStatus(`⚠️ 特殊层 ${lay} 参数无效`, true);
+                    return;
+                }
+                if (specialMap[lay].width / wireDia < 1) {
+                    setStatus(`⚠️ 特殊层 ${lay} 宽度小于线径`, true);
                     return;
                 }
             }
-            
-            // ========== 自动生成文件名 ==========
+
             let filename = $('fname').value.trim();
             if (filename === "") {
                 filename = autoGenerateFilename(wireDia, totalLayers, widthDef);
                 $('fname').value = filename.replace('.txt', '');
             }
             if (!filename.toLowerCase().endsWith('.txt')) filename += '.txt';
-            
+
             const genParams = {
-                wireDia, totalLayers, widthDef, feedDef,
-                pauseArr: pauseLayersArr,
+                wireDia,
+                totalLayers,
+                widthDef,
+                feedDef,
                 specialMap,
                 endStayY,
                 negativeStart,
                 pauseAtYWidth,
-                pauseYWidthValue
+                pauseYWidthValue: pauseAtYWidth ? pauseYWidthValue : 0,
             };
-            
+
             try {
                 const gcodeText = buildGcode(genParams);
                 const blob = new Blob([gcodeText], { type: 'text/plain;charset=utf-8' });
@@ -312,21 +598,20 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                setStatus(`✅ 文件 "${filename}" 已生成`, false);
-                $('fname').value = '';
+                setStatus(`✅ 已生成 "${filename}"`, false);
             } catch (err) {
                 setStatus(`❗ 生成失败: ${err.message}`, true);
             }
         }
-        
-        // 绑定事件 + 实时预览
+
         $('genBtn').addEventListener('click', generateAndSave);
         $('wdia').addEventListener('input', updateFileNamePreview);
         $('layers').addEventListener('input', updateFileNamePreview);
         $('width').addEventListener('input', updateFileNamePreview);
         
+        // 修复：删除空赋值，直接调用预览
         updateFileNamePreview();
-        statusDiv.style.display = 'none';
+        if (statusDiv) statusDiv.style.display = 'none';
     })();
 </script>
 </body>
