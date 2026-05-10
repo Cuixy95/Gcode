@@ -292,8 +292,8 @@
             if (!filename.toLowerCase().endsWith('.txt')) filename += '.txt';
             
             const genParams = {
-                线径, 总层数, 宽度定义, 进给定义,
-                暂停数组: 暂停层数数组,
+                wireDia, totalLayers, widthDef, feedDef,
+                pauseArr: pauseLayersArr,
                 specialMap,
                 endStayY,
                 negativeStart,
@@ -302,16 +302,16 @@
             };
             
             try {
-                常量 G代码文本 = 生成G代码(生成参数);
+                const gcodeText = buildGcode(genParams);
                 const blob = new Blob([gcodeText], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
                 document.body.appendChild(a);
-                a.点击();
-                document.body.删除子节点(a);
-                URL.撤销对象URL(url);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
                 setStatus(`✅ 文件 "${filename}" 已生成`, false);
                 $('fname').value = '';
             } catch (err) {
@@ -328,6 +328,6 @@
         updateFileNamePreview();
         statusDiv.style.display = 'none';
     })();
-</脚本>
+</script>
 </body>
-    </html>
+</html>
