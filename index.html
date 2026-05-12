@@ -328,6 +328,13 @@
             <input type="text" id="pauseLayers" value="1" placeholder="例: 1+3">
         </div>
 
+        <!-- 新增：暂停层暂停方式选择 -->
+        <div class="checkbox-row">
+            <input type="checkbox" id="pauseLayersFullStop" checked>
+            <label>⏸️ 暂停层是否除能</label>
+        </div>
+        <div class="tip" style="margin-left: 14px; margin-bottom: 8px;">未勾选时暂停层仅暂停</div>
+
         <div class="form-row">
             <label>📌 Y轴暂停宽度 (mm) <span>第一层Y移动到该宽度暂停</span></label>
             <input type="number" id="pauseYWidth" step="0.1" value="2" placeholder="到达该Y值时暂停">
@@ -379,6 +386,14 @@
         }
         function hideStatus() { if (statusDiv) statusDiv.style.display = 'none'; }
 
+        // 解析暂停层号（返回数组）
+        function parsePauseLayers(raw, total) {
+            if (!raw || !raw.trim()) return [];
+            return [...new Set(
+                raw.split('+').map(p => parseInt(p.trim())).filter(n => !isNaN(n) && n >= 1 && n <= total)
+            )].sort((a,b)=>a-b);
+        }
+
         function parseSpecialLayers(str) {
             const map = {};
             if (!str || !str.trim()) return map;
@@ -425,6 +440,15 @@
             $('autoNamePreview').innerHTML = `✨ 自动命名预览: (填线径/层数/宽度)`;
         }
 
+        // 根据设置生成暂停代码
+        function getPauseCode(fullStop) {
+            if (fullStop) {
+                return ["M0", "$MD", "M0"];
+            } else {
+                return ["M0"];
+            }
+        }
+
         function buildGcode(params) {
             const {
                 wireDia,
@@ -432,6 +456,8 @@
                 widthDef,
                 feedDef,
                 specialMap,
+                pauseLayersArr,
+                pauseLayersFullStop,
                 endStayY,
                 negativeStart,
                 pauseAtYWidth,
@@ -439,7 +465,7 @@
             } = params;
 
             const lines = [];
-            lines.push(";绕线机代码 (超紧凑版 - Y宽度暂停)");
+            lines.push(";绕线机代码 (支持暂停层自定义)");
             lines.push("G21");
             lines.push("G91");
             lines.push("; ========== 绕线开始 ==========");
@@ -477,12 +503,14 @@
                     }
                 };
 
+                // 绕制一圈一圈移动
                 for (let t = 1; t <= turns; t++) {
                     const yMove = currentDir * wireDia;
                     batchX += 1;
                     batchY += yMove;
 
                     let needPause = false;
+                    // Y轴宽度暂停 (第一层)
                     if (pauseAtYWidth && lay === 1 && !firstLayerPauseTriggered) {
                         const futureTotalY = totalY + batchY;
                         const currentAbsY = Math.abs(totalY);
@@ -497,15 +525,29 @@
 
                     if (needPause) {
                         flushBatch();
-                        lines.push("", `; ----- Y轴暂停 ${pauseYWidthValue}mm -----`, "M0", "$MD", "M0", "; 确认后继续", "");
+                        lines.push("", `; ----- Y轴暂停 ${pauseYWidthValue}mm -----`);
+                        const pauseLines = getPauseCode(pauseLayersFullStop);
+                        lines.push(...pauseLines);
+                        lines.push("; 确认后继续", "");
                     }
                 }
                 flushBatch();
+                
+                // 层完成后的暂停（根据暂停层号列表）
+                if (pauseLayersArr.includes(lay)) {
+                    lines.push(`; ----- 层 ${lay} 完成，暂停 -----`);
+                    const pauseLines = getPauseCode(pauseLayersFullStop);
+                    lines.push(...pauseLines);
+                    lines.push(`; 层 ${lay} 暂停结束，继续下一层`);
+                    lines.push("");
+                }
+                
                 lines.push(`; 层${lay}完成 | 累计X=${totalX}圈 | Y=${totalY.toFixed(4)}mm`);
             }
 
             lines.push("; ==== 绕线完成 ====");
             lines.push("G90");
+            // 结尾暂停保持不变：三行
             lines.push("M0");
             lines.push("$MD");
             lines.push("M0");
@@ -539,19 +581,23 @@
             if (isNaN(widthDef) || widthDef <= 0) { setStatus("⚠️ 层宽度正数", true); return; }
             if (isNaN(feedDef) || feedDef <= 0) { setStatus("⚠️ 速度正数", true); return; }
 
+            const pauseRaw = $('pauseLayers').value;
             const specialRaw = $('special').value;
             let endStayY = parseFloat($('endY').value);
             if (isNaN(endStayY)) endStayY = 60;
             const negativeStart = $('negStart').checked;
             const pauseAtYWidth = $('pauseAtYWidth').checked;
             const pauseYWidthValue = parseFloat($('pauseYWidth').value);
+            const pauseLayersFullStop = $('pauseLayersFullStop').checked;
 
             if (pauseAtYWidth && (isNaN(pauseYWidthValue) || pauseYWidthValue <= 0)) {
-                setStatus("⚠️ 启用暂停时宽度须>0", true);
+                setStatus("⚠️ 启用Y轴暂停时宽度须>0", true);
                 return;
             }
 
+            const pauseLayersArr = parsePauseLayers(pauseRaw, totalLayers);
             const specialMap = parseSpecialLayers(specialRaw);
+            
             for (let layStr in specialMap) {
                 const lay = parseInt(layStr);
                 if (lay > totalLayers) {
@@ -581,6 +627,8 @@
                 widthDef,
                 feedDef,
                 specialMap,
+                pauseLayersArr,
+                pauseLayersFullStop,
                 endStayY,
                 negativeStart,
                 pauseAtYWidth,
@@ -595,9 +643,9 @@
                 a.href = url;
                 a.download = filename;
                 document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                a.点击();
+                document.body.删除子节点(a);
+                URL.撤销对象URL(url);
                 setStatus(`✅ 已生成 "${filename}"`, false);
             } catch (err) {
                 setStatus(`❗ 生成失败: ${err.message}`, true);
@@ -605,14 +653,14 @@
         }
 
         $('genBtn').addEventListener('click', generateAndSave);
-        $('wdia').addEventListener('input', updateFileNamePreview);
-        $('layers').addEventListener('input', updateFileNamePreview);
+        $('wdia').addEventListener'input',updateFileNamePreview;
+        $('layers').addEventListener'input',updateFileNamePreview;
         $('width').addEventListener('input', updateFileNamePreview);
         
         // 修复：删除空赋值，直接调用预览
         updateFileNamePreview();
-        if (statusDiv) statusDiv.style.display = 'none';
+        如果 (statusDiv) statusDiv.样式.显示 = '无';
     })();
-</script>
+</脚本>
 </body>
-</html>
+    </html>
