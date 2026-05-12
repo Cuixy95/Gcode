@@ -643,9 +643,9 @@
                 a.href = url;
                 a.download = filename;
                 document.body.appendChild(a);
-                a.点击();
-                document.body.删除子节点(a);
-                URL.撤销对象URL(url);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
                 setStatus(`✅ 已生成 "${filename}"`, false);
             } catch (err) {
                 setStatus(`❗ 生成失败: ${err.message}`, true);
@@ -653,14 +653,14 @@
         }
 
         $('genBtn').addEventListener('click', generateAndSave);
-        $('wdia').addEventListener'input',updateFileNamePreview;
-        $('layers').addEventListener'input',updateFileNamePreview;
+        $('wdia').addEventListener('input', updateFileNamePreview);
+        $('layers').addEventListener('input', updateFileNamePreview);
         $('width').addEventListener('input', updateFileNamePreview);
         
         // 修复：删除空赋值，直接调用预览
         updateFileNamePreview();
-        如果 (statusDiv) statusDiv.样式.显示 = '无';
+        if (statusDiv) statusDiv.style.display = 'none';
     })();
-</脚本>
+</script>
 </body>
-    </html>
+</html>
