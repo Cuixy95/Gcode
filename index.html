@@ -1,666 +1,597 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>绕线机代码生成器</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="无结子线工艺说明与常见问题解答，支持关键词搜索与目录查阅。">
+<title>无结子线工艺说明与答疑</title>
+<style>
+  :root{
+    --paper:#F0EAE0; --card:#FBF7F0; --ink:#252824; --soft:#6B675F;
+    --line:#DCD4C6; --accent:#B5392A; --band:#E7E0D4;
+    --warn:#8A5A00; --warnbg:#FBF0D8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  [hidden]{display:none !important}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Helvetica Neue",Arial,sans-serif;
+    font-size:16px;line-height:1.7;
+  }
+  .wrap{max-width:780px;margin:0 auto;padding:0 18px}
 
-        body {
-            font-family: system-ui, 'Microsoft YaHei', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-            background: #eef2f5;
-            padding: 8px 10px;
-            font-size: 13px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+  .bar{position:sticky;top:0;z-index:20;background:rgba(240,234,224,.95);border-bottom:1px solid var(--line)}
+  .barin{display:flex;align-items:center;gap:10px;padding:10px 0;min-height:56px}
+  .kicker{font-size:11px;letter-spacing:.12em;color:var(--soft)}
+  .doctitle{font-size:15px;font-weight:600;line-height:1.3}
+  .iconbtn{
+    border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;
+    padding:7px 11px;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap;
+  }
+  .iconbtn:active{background:var(--band)}
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
+  .hero{padding:20px 0 6px}
+  h1{font-size:25px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{font-size:13.5px;color:var(--soft);margin:0 0 16px}
+  .searchbox{position:relative;display:flex;gap:8px}
+  #q{
+    flex:1;min-width:0;font-size:16px;padding:13px 38px 13px 14px;border:1px solid var(--line);
+    border-radius:11px;background:#fff;color:var(--ink);outline:none;font-family:inherit;
+  }
+  #q:focus{border-color:var(--accent)}
+  .clr{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    border:0;background:transparent;color:var(--soft);font-size:19px;line-height:1;
+    cursor:pointer;padding:4px;
+  }
+  .guide{font-size:13px;color:var(--soft);margin:14px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+  .chip{
+    border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;
+    padding:6px 12px;font-size:13.5px;font-family:inherit;cursor:pointer;
+  }
+  .chip:active{background:var(--band);border-color:var(--accent)}
+  .hint{font-size:13px;color:var(--soft);margin-top:12px;min-height:20px}
+  .warn{
+    display:none;margin-top:12px;background:var(--warnbg);border:1px solid #E7CF9B;
+    color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;
+  }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:16px}
+  .card h2{font-size:13px;letter-spacing:.08em;color:var(--soft);margin:0 0 8px;font-weight:600}
 
-        .header {
-            background: linear-gradient(120deg, #1f6e8c, #0e4b64);
-            color: white;
-            text-align: center;
-            padding: 12px 8px;
-        }
+  .secname{
+    font-size:12.5px;letter-spacing:.08em;color:var(--accent);margin:16px 0 2px;
+    padding-bottom:6px;border-bottom:2px solid var(--accent);
+  }
+  .secblk:first-child .secname{margin-top:4px}
+  .qitem{
+    display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;
+    background:transparent;border:0;border-bottom:1px dashed var(--line);
+    padding:11px 2px;font-size:15.5px;font-family:inherit;color:var(--ink);cursor:pointer;
+  }
+  .qitem:last-child{border-bottom:0}
+  .qitem:active{color:var(--accent)}
+  .qitem .n{color:var(--soft);font-size:12.5px;font-variant-numeric:tabular-nums;min-width:1.7em;padding-top:3px}
+  .qitem .arrow{margin-left:auto;color:var(--soft);font-size:13px;padding-top:3px}
+  .empty{padding:26px 4px;color:var(--soft);font-size:15px;text-align:center;line-height:1.9}
 
-        .header h1 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            letter-spacing: -0.2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
+  .crumb{display:flex;align-items:center;gap:10px;padding:16px 0 4px;font-size:13px;color:var(--soft);flex-wrap:wrap}
+  .linkbtn{border:0;background:transparent;color:var(--accent);font-family:inherit;font-size:13.5px;cursor:pointer;padding:2px 0}
+  .qtitle{font-size:22px;line-height:1.4;margin:10px 0 0}
+  .ans .body{font-size:16px}
+  .ans .body p{margin:0 0 12px}
+  .ans .body ul,.ans .body ol{margin:0 0 12px;padding-left:22px}
+  .ans .body li{margin:5px 0}
+  .ans .body b{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0 12px;background:#fff}
+  th,td{border:1px solid var(--line);padding:8px 9px;text-align:left;vertical-align:top}
+  th{background:var(--band);font-weight:600;white-space:nowrap}
+  .note{background:var(--band);border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 8px 8px 0;font-size:14.5px;margin:0 0 12px}
+  .todo{background:var(--warnbg);color:var(--warn);border-radius:5px;padding:1px 6px;font-size:13.5px}
+  .acts{display:flex;gap:10px;margin-top:14px}
+  .btn{
+    flex:1;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;
+    padding:12px;font-size:14.5px;font-family:inherit;cursor:pointer;
+  }
+  .btn:active{background:var(--band)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .siblist{display:flex;flex-direction:column}
+  .navrow{display:flex;gap:10px;margin-top:16px}
+  .navrow .btn{flex:1}
+  .navrow .btn[disabled]{opacity:.4;cursor:default}
 
-        .form-section {
-            padding: 8px 14px;
-            border-bottom: 1px solid #eef2f5;
-        }
-
-        .section-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #1f5068;
-            margin-bottom: 6px;
-            padding-left: 8px;
-            border-left: 3px solid #2c7da0;
-            letter-spacing: -0.2px;
-        }
-
-        .vertical-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .input-item label {
-            font-weight: 600;
-            font-size: 0.68rem;
-            color: #2c3e4e;
-            letter-spacing: 0.2px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .input-item label span {
-            background: #e9ecef;
-            padding: 1px 5px;
-            border-radius: 20px;
-            font-size: 0.6rem;
-            font-weight: normal;
-            color: #2c7da0;
-        }
-
-        .input-item input {
-            padding: 7px 10px;
-            border: 1px solid #dce5ec;
-            border-radius: 14px;
-            font-size: 0.8rem;
-            background: #ffffff;
-            transition: all 0.15s;
-        }
-
-        .input-item input:focus {
-            border-color: #2c7da0;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(44, 125, 160, 0.1);
-        }
-
-        .compact-tip {
-            font-size: 0.6rem;
-            color: #6c8a9c;
-            margin-top: 0px;
-            margin-left: 4px;
-        }
-
-        .checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin: 6px 0 2px;
-            background: #f9fbfd;
-            padding: 5px 8px;
-            border-radius: 16px;
-        }
-
-        .checkbox-row label {
-            font-weight: 500;
-            font-size: 0.7rem;
-            color: #1f5068;
-        }
-
-        input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #2c7da0;
-            margin: 0;
-        }
-
-        .form-row {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            margin-bottom: 8px;
-        }
-
-        .form-row label {
-            font-weight: 600;
-            font-size: 0.68rem;
-            color: #2c3e4e;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .form-row label span {
-            background: #e9ecef;
-            padding: 1px 5px;
-            border-radius: 20px;
-            font-size: 0.6rem;
-            font-weight: normal;
-            color: #6c8a9c;
-        }
-
-        .form-row input {
-            padding: 6px 10px;
-            border: 1px solid #dce5ec;
-            border-radius: 14px;
-            font-size: 0.78rem;
-        }
-
-        .tip {
-            font-size: 0.6rem;
-            color: #6c8a9c;
-            line-height: 1.2;
-        }
-
-        .filename-section {
-            background: #fafcff;
-            padding: 8px 14px;
-            border-top: 1px solid #eef2f5;
-            border-bottom: 1px solid #eef2f5;
-        }
-
-        .filename-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .filename-row label {
-            font-weight: 700;
-            font-size: 0.7rem;
-            color: #1f5068;
-        }
-
-        .filename-input {
-            flex: 1;
-            padding: 6px 12px;
-            border-radius: 30px;
-            border: 1px solid #d0dfea;
-            font-size: 0.75rem;
-            background: white;
-        }
-
-        .auto-name-hint {
-            font-size: 0.65rem;
-            color: #2c7da0;
-            margin-top: 4px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .auto-name-hint:hover {
-            text-decoration: underline;
-        }
-
-        .button-section {
-            padding: 12px 14px 16px;
-            background: white;
-        }
-
-        .generate-btn {
-            background: linear-gradient(100deg, #2c7da0, #1a5c78);
-            border: none;
-            padding: 10px 14px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border-radius: 40px;
-            width: 100%;
-            color: white;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .generate-btn:active {
-            transform: scale(0.97);
-        }
-
-        .status {
-            text-align: center;
-            font-size: 0.7rem;
-            margin-bottom: 10px;
-            padding: 6px;
-            border-radius: 30px;
-            display: none;
-            font-weight: 500;
-        }
-
-        .status.error {
-            background: #ffe9e9;
-            color: #c7362b;
-        }
-
-        .status.success {
-            background: #e1f3ea;
-            color: #1e6f3f;
-        }
-
-        hr {
-            display: none;
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 5px 8px;
-            }
-            .form-section {
-                padding: 6px 12px;
-            }
-            .filename-section {
-                padding: 6px 12px;
-            }
-            .button-section {
-                padding: 10px 12px 14px;
-            }
-            .checkbox-row {
-                margin: 4px 0 2px;
-                padding: 4px 8px;
-            }
-        }
-    </style>
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:18px 0 44px;font-size:12.5px;color:var(--soft)}
+  #top{
+    position:fixed;right:16px;bottom:20px;width:46px;height:46px;border-radius:50%;
+    border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;
+    display:none;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.12);font-family:inherit;
+  }
+  #toast{
+    position:fixed;left:50%;bottom:80px;transform:translateX(-50%);
+    background:rgba(37,40,36,.93);color:#fff;padding:10px 16px;border-radius:10px;
+    font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:40;
+    max-width:80%;text-align:center;
+  }
+  #toast.on{opacity:1}
+  @media print{
+    .bar,#top,.acts,.navrow,.crumb,#toast{display:none !important}
+    #home{display:none !important}
+    body{background:#fff}
+    .card{border-color:#ccc}
+  }
+</style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>⚙️ 绕线机代码生成器</h1>
+
+<header class="bar">
+  <div class="wrap barin">
+    <button id="back" class="iconbtn" hidden>← 目录</button>
+    <div>
+      <div class="kicker" id="kicker"></div>
+      <div class="doctitle" id="doctitle"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="home">
+    <div class="hero">
+      <h1 id="h1"></h1>
+      <p class="sub" id="sub"></p>
+      <div class="searchbox">
+        <input id="q" type="search" placeholder="输入关键词搜索" autocomplete="off">
+        <button id="clear" class="clr" hidden title="清空">×</button>
+      </div>
+      <div class="guide">不知道搜什么？点下面这些常用问题：</div>
+      <div class="chips" id="hot"></div>
+      <div class="hint" id="hint"></div>
+      <div class="warn" id="warn"></div>
     </div>
 
-    <div class="form-section">
-        <div class="section-title">📐 基础参数</div>
-        <div class="vertical-inputs">
-            <div class="input-item">
-                <label>🎯 线径 / 密度 (mm) <span>数值越小越紧密</span></label>
-                <input type="number" id="wdia" step="0.01" value="0.15" placeholder="0.15">
-            </div>
-            <div class="input-item">
-                <label>📚 总层数 <span>绑制层数</span></label>
-                <input type="number" id="layers" value="" placeholder="绕制层数" step="1">
-            </div>
-            <div class="input-item">
-                <label>📏 层宽度 (mm) <span>绕线区域宽度</span></label>
-                <input type="number" id="width" step="0.1" value="" placeholder="排线总宽">
-            </div>
-            <div class="input-item">
-                <label>⚡ 默认速度 F <span>mm/min</span></label>
-                <input type="number" id="feed" value="3000" step="100" placeholder="进给速度">
-            </div>
-        </div>
-
-        <div class="checkbox-row">
-            <input type="checkbox" id="negStart" checked>
-            <label>🔁 从右往左绑制（反向起始）</label>
-        </div>
+    <div class="card" id="tocCard">
+      <h2 id="tocTitle">目录</h2>
+      <div id="toc"></div>
     </div>
+    <div class="empty" id="empty" hidden>没有找到相关问题。<br>换个说法试试，比如「线」「钩」「胶」「发货」。</div>
+  </section>
 
-    <div class="form-section">
-        <div class="section-title">⚙️ 高级控制</div>
-        <div class="form-row">
-            <label>⏸️ 暂停层号 <span>多层级用 + 分隔</span></label>
-            <input type="text" id="pauseLayers" value="1" placeholder="例: 1+3">
-        </div>
-
-        <!-- 新增：暂停层暂停方式选择 -->
-        <div class="checkbox-row">
-            <input type="checkbox" id="pauseLayersFullStop" checked>
-            <label>⏸️ 暂停层是否除能</label>
-        </div>
-        <div class="tip" style="margin-left: 14px; margin-bottom: 8px;">未勾选时暂停层仅暂停</div>
-
-        <div class="form-row">
-            <label>📌 Y轴暂停宽度 (mm) <span>第一层Y移动到该宽度暂停</span></label>
-            <input type="number" id="pauseYWidth" step="0.1" value="2" placeholder="到达该Y值时暂停">
-        </div>
-        <div class="checkbox-row">
-            <input type="checkbox" id="pauseAtYWidth" checked>
-            <label>启用Y轴宽度暂停</label>
-        </div>
-
-        <div class="form-row">
-            <label>✨ 特殊宽度/速度设置 <span>格式: 层号=宽度=F速度，/分隔</span></label>
-            <input type="text" id="special" value="" placeholder="例: 3=5=500">
-        </div>
-
-        <div class="form-row">
-            <label>📍 结束停留 Y (mm) <span>最后一步机头移动至该位置</span></label>
-            <input type="number" id="endY" value="60" step="1" placeholder="绕线结束Y坐标">
-        </div>
+  <section id="qa" hidden>
+    <div class="crumb">
+      <button id="back2" class="linkbtn">← 返回目录</button>
+      <span id="crumbSec"></span>
     </div>
-
-    <div class="filename-section">
-        <div class="filename-row">
-            <label>📄 文件名</label>
-            <input type="text" id="fname" class="filename-input" placeholder="留空自动命名">
-        </div>
-        <div class="auto-name-hint" id="autoNamePreview">✨ 自动命名预览: 等待参数</div>
+    <h1 class="qtitle" id="qtitle"></h1>
+    <div class="card ans"><div class="body" id="ansBody"></div></div>
+    <div class="acts">
+      <button class="btn primary" id="copyA">复制本条答案</button>
+      <button class="btn" id="copyL">复制本条链接</button>
     </div>
-
-    <div class="button-section">
-        <div id="statusMsg" class="status"></div>
-        <button class="generate-btn" id="genBtn">📁 生成并保存 G-code</button>
+    <div class="card" id="sibCard">
+      <h2 id="sibTitle"></h2>
+      <div class="siblist" id="sib"></div>
     </div>
-</div>
+    <div class="navrow">
+      <button class="btn" id="prev">← 上一题</button>
+      <button class="btn" id="next">下一题 →</button>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap"><div id="foot"></div></footer>
+<button id="top" title="回到顶部">顶部</button>
+<div id="toast"></div>
 
 <script>
-    (function() {
-        const $ = (id) => document.getElementById(id);
-        const statusDiv = $('statusMsg');
-
-        function setStatus(msg, isError = false) {
-            statusDiv.textContent = msg;
-            statusDiv.className = `status ${isError ? 'error' : 'success'}`;
-            statusDiv.style.display = 'block';
-            if (!isError) {
-                setTimeout(() => {
-                    if (statusDiv) statusDiv.style.display = 'none';
-                }, 2500);
-            }
+/* ==== DATA-START ==== */
+var DATA = {
+  "biz": {
+    "kicker": "无结子线 · 客户查询手册",
+    "title": "无结子线工艺说明与答疑",
+    "subtitle": "点目录或搜关键词，进入单条看答案",
+    "hot": [
+      "子线",
+      "多少钱",
+      "胶水",
+      "发货",
+      "退款"
+    ],
+    "contact": "售后与咨询：【待填：微信号 / 店铺名】",
+    "version": "v1.1",
+    "disclaimer": "本页说明基于当前机型的实际使用经验。实际效果取决于线材、钩型、参数与操作，不做具体拉力倍数承诺；碳线、异形钩等请先试样确认。"
+  },
+  "sections": [
+    {
+      "t": "一、原理与认知",
+      "items": [
+        {
+          "q": "什么是无结子线？",
+          "a": "<p>钩柄处<b>不打结</b>。用一根更细的绑制线把子线一圈一圈勒紧、压在钩柄上，再点胶固化，靠缠绕层受力固定。</p>"
+        },
+        {
+          "q": "无结和手绑有什么区别？",
+          "a": "<p>手绑是子线在钩柄上打结；无结把这颗结整个去掉。因为断线绝大多数都断在结上，所以近钩端的有效拉力更接近线本身的强度。</p><p>另一个区别是一致性：机器绑的每一副都一样，不靠个人手感。</p>"
+        },
+        {
+          "q": "无结子线是智商税吗？",
+          "a": "<p>不是，但也不必神话。手绑打得好的人，成品本来就不差——这话是对的。</p><p>无结真正的优势是<b>每一副都一样、可批量复制、不依赖手感</b>，而不是“拉力无敌”。</p>"
+        },
+        {
+          "q": "拉力能提升多少？有具体百分比吗？",
+          "a": "<p>不给百分比承诺。公开的钓鱼教学口径是：<b>好的结能保留 90% 以上强度，差的结保留不到一半</b>（伊利诺伊州自然资源部钓鱼教学页）。</p><p>无结的意义是把结果<b>稳定在高水平</b>；具体数值取决于你的线和钩，先试绑才有结论。</p>"
+        },
+        {
+          "q": "是不是整条线组都没有结了？",
+          "a": "<p>八字环处可以绑单丝双刃或者双丝双刃，可进一步提升拉力值。</p><p>只绑钩为半无结，八字环也绑制加固为全无结</p>"
+        },
+        {
+          "q": "无结子线有什么缺点？",
+          "a": "<p>三点如实说：</p><ul><li>钩柄处会变粗、略微增重，钓极轻口时手绑仍有优势；</li><li>单价高于手绑（多了绑制线和胶水）；</li><li>有材料限制：碳线、异形钩等不适用。</li></ul>"
         }
-        function hideStatus() { if (statusDiv) statusDiv.style.display = 'none'; }
-
-        // 解析暂停层号（返回数组）
-        function parsePauseLayers(raw, total) {
-            if (!raw || !raw.trim()) return [];
-            return [...new Set(
-                raw.split('+').map(p => parseInt(p.trim())).filter(n => !isNaN(n) && n >= 1 && n <= total)
-            )].sort((a,b)=>a-b);
+      ]
+    },
+    {
+      "t": "二、能不能绑我的线和钩",
+      "items": [
+        {
+          "q": "能绑哪些子线？",
+          "a": "<p>常见尼龙线基本都可以，优先选标着“无结子线专用”的线。</p><p>已验证型号：<b>sy88、sy96、ps99s、a78n、dad92 无结版</b> 等。</p>"
+        },
+        {
+          "q": "哪些线不建议绑？",
+          "a": "<p>碳线、伴碳、柔碳，以及特别硬滑、带镀层的线。</p><p>碳线普遍偏硬、不容易压住，买不到商用无结碳线的话，绑出来大概率会切钩柄。</p>"
+        },
+        {
+          "q": "能绑哪些钩型？",
+          "a": "<p>市面上常见的<b>无结钩型</b>都可以。</p><p>不支持：异形钩、钩柄短又弯曲的、钩柄带深线槽的。</p>"
+        },
+        {
+          "q": "钩柄有镀层、很滑怎么办？",
+          "a": "<p>可以绑，但要加参数：先用<b>打底</b>整层遮盖镀层，再进行缠绕；必要时加一点松香粉（防滑粉）增加摩擦力。</p>"
+        },
+        {
+          "q": "最短最长、最细最粗是多少？",
+          "a": "<p>单头机未改装最短 <b>21 厘米</b>，向上不限；改装后上下都不限。</p><p>子线号数 <b>0.2 号到 20 号</b>，目前最大记录20号线。</p>"
+        },
+        {
+          "q": "能绑碳线吗？",
+          "a": "<p>不建议。碳线偏硬，缠绕层不容易压伤，容易出现切钩柄。</p><p>如果你手上有确认好用的商用无结碳线，可以寄样过来试。</p>"
         }
-
-        function parseSpecialLayers(str) {
-            const map = {};
-            if (!str || !str.trim()) return map;
-            str.split('/').forEach(seg => {
-                seg = seg.trim();
-                if (!seg) return;
-                const parts = seg.split('=');
-                if (parts.length >= 3) {
-                    const layer = parseInt(parts[0].trim());
-                    const width = parseFloat(parts[1].trim());
-                    let feedRaw = parts[2].trim().toUpperCase();
-                    if (feedRaw.startsWith('F')) feedRaw = feedRaw.slice(1);
-                    const feed = parseInt(feedRaw);
-                    if (!isNaN(layer) && !isNaN(width) && !isNaN(feed) && layer > 0 && width > 0 && feed > 0) {
-                        map[layer] = { width, feed };
-                    }
-                }
-            });
-            return map;
+      ]
+    },
+    {
+      "t": "三、工艺与参数",
+      "items": [
+        {
+          "q": "一副成品要经过哪几步？",
+          "a": "<p>八步：装钩 → 机头到起点 → 打底 → 穿子线拉紧 → 缠绕成型 → 切线取钩 → 点胶固化 → 成品。</p>"
+        },
+        {
+          "q": "程序名 15c4k45 是什么意思？",
+          "a": "<p>读法是<b>密度 0.15、层数 4、宽度 4.5 毫米</b>。</p><p>机器自带 25 条基础程序，常用钩型都有现成程序文件，不用自己从零编写；特殊钩型可以远程指导改程序或升级固件。</p>"
+        },
+        {
+          "q": "密度、层数、宽度分别管什么？",
+          "a": "<table><tr><th>参数</th><th>作用</th><th>调大的后果</th></tr><tr><td>密度</td><td>排线疏密，要与绑制线 D 数匹配</td><td>更牢，但更厚更重</td></tr><tr><td>层数</td><td>覆盖几层，左右一来一回为2层</td><td>更牢、更遮盖镀层</td></tr><tr><td>宽度</td><td>左右绑制宽度（K值），K值必须低于起点值0.5</td><td>接触面更大、更牢</td></tr></table>"
+        },
+        {
+          "q": "参数怎么调？先调哪个？",
+          "a": "<p>顺序是 <b>张力 → 密度 → 层数 → 宽度</b>，一次只改一个。</p><p class='note'>原则：先保证不抽脱、不切钩柄，再追求轻薄美观。新手最容易犯的错是为了好看把参数调薄，结果一用就抽脱。</p>"
+        },
+        {
+          "q": "多少 D 的绑制线配什么子线？",
+          "a": "<table><tr><th>绑制线</th><th>适用场景</th></tr><tr><td>45D</td><td>袖钩、狼牙、1.5 号以下子线，小钩隐形无结</td></tr><tr><td><b>75D</b></td><td><b>通用性最高，起步首选</b></td></tr><tr><td>100D</td><td>可沿用 75D 参数，拉力略大</td></tr><tr><td>120D / 140D</td><td>巨物子线</td></tr><tr><td>150D / 200D / 300D</td><td>全无结专用程序（两段密度）</td></tr></table><p>以上为参考值。密度、宽度、层数要根据你自己的绑制线、子线、钩和张力动态微调。</p>"
+        },
+        {
+          "q": "什么是打底？为什么必须打？",
+          "a": "<p>打底就是在钩柄上先缠一层。</p><p>作用有两个：<b>建立摩擦力</b>、<b>遮盖钩柄镀层</b>。镀层钩不打底，后面的缠绕层会整体打滑。</p>"
+        },
+        {
+          "q": "起点为什么要留 1mm？",
+          "a": "<p>钩柄在夹持中会有轻微晃动，起点太靠里会切到绑制线。</p><p>做法：导嘴到位后再往左留约 <b>1mm</b> 安全距离，并确保<b>所选程序的宽度小于起点值</b>。</p>"
+        },
+        {
+          "q": "为什么要加松香粉 / 防滑粉？",
+          "a": "<p>如果绑的不是无结专用子线，在子线与绑制线之间加一点松香粉，摩擦力会明显提升，成品更稳。</p>"
         }
-
-        function autoGenerateFilename(wireDia, layers, width) {
-            let wireCode = Math.round(wireDia * 100);
-            let widthCode = Math.round(width * 10);
-            if (wireCode <= 0) wireCode = 1;
-            if (widthCode <= 0) widthCode = 1;
-            return `${wireCode}c${layers}k${widthCode}.txt`;
+      ]
+    },
+    {
+      "t": "四、胶水",
+      "items": [
+        {
+          "q": "用瞬干胶还是 UV 胶？",
+          "a": "<p><b>细钩条</b>（袖钩、狼牙、部分关东）用瞬干胶：快、简单、不增加钩重。</p><p><b>粗钩条</b>（新关东、鲤鱼钩、伊势尼、罗非袖）用 UV 胶：透亮美观、保护绑制线、更耐磨，但要配紫外灯、节奏慢一些。</p>"
+        },
+        {
+          "q": "胶水成本多少？",
+          "a": "<p>20 克瞬干胶约 10 至 25 元，可做 <b>3000 至 5000 副</b>，折合每副不到 1 分钱。</p>"
+        },
+        {
+          "q": "已验证的胶水型号？",
+          "a": "<p>瞬干胶：<b>阿隆发 201</b>（天猫旗舰店正品）、<b>496 无结瞬干胶</b>。挑选标准是不烧线、不发白、低气味。</p><p>UV 胶型号：<span class='todo'>电商平台搜索无结子线专用uv胶</span></p>"
+        },
+        {
+          "q": "线头炸开怎么办？",
+          "a": "<p>多半是没齐根切、或者胶没渗进去。用手拧合，或补少许胶水即可。</p>"
+        },
+        {
+          "q": "胶水发白、烧线怎么办？",
+          "a": "<p>瞬干胶用量过多，或胶水型号偏劣。减少用量，换成不烧线、低气味的型号。</p>"
         }
-
-        function updateFileNamePreview() {
-            const wireRaw = $('wdia').value;
-            const layersRaw = $('layers').value;
-            const widthRaw = $('width').value;
-            if (wireRaw && layersRaw && widthRaw) {
-                const wireDia = parseFloat(wireRaw);
-                const layers = parseInt(layersRaw);
-                const width = parseFloat(widthRaw);
-                if (!isNaN(wireDia) && !isNaN(layers) && !isNaN(width) && wireDia > 0 && layers > 0 && width > 0) {
-                    const preview = autoGenerateFilename(wireDia, layers, width).replace('.txt', '');
-                    $('autoNamePreview').innerHTML = `✨ 自动命名预览: ${preview}.txt`;
-                    return;
-                }
-            }
-            $('autoNamePreview').innerHTML = `✨ 自动命名预览: (填线径/层数/宽度)`;
+      ]
+    },
+    {
+      "t": "五、机器与购买",
+      "items": [
+        {
+          "q": "多少钱？包含什么？",
+          "a": "<p>三代小钢炮 <b>1300 元包邮</b>（偏远地区除外），定金 200 元/台。</p><p><b>包含</b>：主机 + 一卷透明色 75D 绑制线（专用短轴，兼容 8mm 通用轴）。</p><p><b>不含</b>：立杆（自购 60cm，约 14 元）、鱼钩、子线、胶水等耗材。</p>"
+        },
+        {
+          "q": "多久发货？怎么付款？",
+          "a": "<p>预定 <b>10 至 15 天</b>发货（偶尔半个月）。微信转账或闲鱼下定金链接，按订单时间顺序发货。</p><p>下定金保证发货、发货时间不保证、随时可退；<b>发货顺序不保留</b>。发货前会发试机视频，出单号后补尾款，<b>不支持货到付款</b>。顺丰发货，运费超过 41.2 元需补。</p>"
+        },
+        {
+          "q": "收到货要注意什么？",
+          "a": "<p>先检查外包装有无破损，拍开箱视频，最好和快递员一起开箱验货；有问题及时联系，有保价。<b>包装箱请保留</b>，后续售后可能用得上。</p>"
+        },
+        {
+          "q": "能退吗？有质保吗？",
+          "a": "<p>如实说明：不是厂家，<b>没有质保</b>。</p><p>2 天内可退；无理由寄回由客户承担来回运费，退款需扣除运费 + 包装费 20 元。维修配件按成本价 + 运费。</p>"
+        },
+        {
+          "q": "好不好学？多久能上手？",
+          "a": "<p>自带 25 条基础程序，常用钩型有现成文件，不用从零编。难点只有三处：<b>装钩要平、起点留 1mm、起步要拉紧</b>。</p><p>这三点做到就能出成品，售后群里一直有远程视频指导。</p>"
+        },
+        {
+          "q": "一小时能绑多少副？",
+          "a": "<p><span class='todo'>待填：熟练工 / 新手 / 含点胶固化的实测时产</span></p><p>我们不给估算值，避免和你实际使用有偏差。</p>"
+        },
+        {
+          "q": "机器容易坏吗？易损件是什么？",
+          "a": "<p>主要易损件是<b>导嘴</b>（撞钩或起点设置不当会撞断）。</p><p>只要做到“钩夹平、起点留安全距离”，正常使用损耗很低。易损件价格：<span class='todo'>待填：导嘴等价格</span></p>"
+        },
+        {
+          "q": "占地多大？电压？要不要空压机？",
+          "a": "<p><span class='todo'>待填：机器尺寸、重量、功率、工作台要求</span></p>"
         }
-
-        // 根据设置生成暂停代码
-        function getPauseCode(fullStop) {
-            if (fullStop) {
-                return ["M0", "$MD", "M0"];
-            } else {
-                return ["M0"];
-            }
+      ]
+    },
+    {
+      "t": "六、售后与异常排查",
+      "items": [
+        {
+          "q": "出现问题，第一步做什么？",
+          "a": "<p>① 先停机，不要连踩脚踏；② 按下面的现象清单查，<b>一次只改一个参数</b>；③ 改完先空跑，再上钩验证。</p><p>说不清就拍视频发售后群，视频指导一直有效。</p>"
+        },
+        {
+          "q": "开机后动作错乱、乱走位",
+          "a": "<p>没回零。先按 <b>B 键</b>回零，显示空闲状态后再操作。</p>"
+        },
+        {
+          "q": "导嘴撞钩，甚至撞断导嘴",
+          "a": "<p>钩子没夹平。重新夹平鱼钩，检查起点是否太靠里；换上新的导嘴。</p>"
+        },
+        {
+          "q": "绑制线被切断",
+          "a": "<p>起点太靠钩柄弯。把起点外移 <b>1mm</b>，并核对所选程序的宽度小于起点值。</p>"
+        },
+        {
+          "q": "子线抽脱、拉几下就松",
+          "a": "<p>起步张力不足，或密度、层数不够。按 <b>张力 → 密度 → 层数</b> 依次上调。</p>"
+        },
+        {
+          "q": "切钩柄（成品在钩柄处断）",
+          "a": "<p>线太硬滑（多为碳线）、张力过大或缠绕勒伤。按 <b>换线 → 降张力 → 降密度</b> 处理。</p>"
+        },
+        {
+          "q": "缠绕层整体打滑",
+          "a": "<p>钩柄有镀层、摩擦不足。打底整层遮盖，并加松香粉。</p>"
+        },
+        {
+          "q": "缠绕层重叠、堆成一坨",
+          "a": "<p>密度与绑制线 D 数不匹配。按 D 数重选密度。</p>"
+        },
+        {
+          "q": "成品长短不一",
+          "a": "<p>熟练度问题，拽线力度不均匀，规范卡线动作。</p>"
+        },
+        {
+          "q": "绑制线起毛、断丝",
+          "a": "<p>张力过大、导嘴磨损，绑制线已经接近拉力极限。按 <b>降张力 → 换绑制线 → 检查导嘴</b> 处理。</p>"
         }
+      ]
+    }
+  ]
+};
+/* ==== DATA-END ==== */
 
-        function buildGcode(params) {
-            const {
-                wireDia,
-                totalLayers,
-                widthDef,
-                feedDef,
-                specialMap,
-                pauseLayersArr,
-                pauseLayersFullStop,
-                endStayY,
-                negativeStart,
-                pauseAtYWidth,
-                pauseYWidthValue
-            } = params;
+(function(){
+  "use strict";
+  var biz = DATA.biz, sections = DATA.sections;
+  var INDEX = [], total = 0, todoCount = 0;
 
-            const lines = [];
-            lines.push(";绕线机代码 (支持暂停层自定义)");
-            lines.push("G21");
-            lines.push("G91");
-            lines.push("; ========== 绕线开始 ==========");
+  sections.forEach(function(sec, si){
+    sec.id = "s" + (si + 1);
+    sec.items.forEach(function(it){
+      total++;
+      it.n = total;
+      it.sec = sec;
+      var a = String(it.a);
+      if (a.indexOf("class='todo'") >= 0 || a.indexOf('class="todo"') >= 0) todoCount++;
+      INDEX.push(it);
+    });
+  });
 
-            let currentDir = negativeStart ? -1 : 1;
-            let totalX = 0;
-            let totalY = 0;
-            let firstLayerPauseTriggered = false;
+  function $(id){ return document.getElementById(id); }
+  var bar = $("back"), home = $("home"), qa = $("qa");
+  var input = $("q"), hint = $("hint"), tocEl = $("toc"), emptyEl = $("empty");
+  var savedScroll = 0;
 
-            for (let lay = 1; lay <= totalLayers; lay++) {
-                let layerW = widthDef;
-                let layerF = feedDef;
-                if (specialMap[lay]) {
-                    layerW = specialMap[lay].width;
-                    layerF = specialMap[lay].feed;
-                }
+  $("kicker").textContent = biz.kicker;
+  $("doctitle").textContent = biz.title;
+  $("h1").textContent = biz.title;
+  $("sub").textContent = biz.subtitle;
+  $("foot").innerHTML = esc(biz.contact) + " · " + esc(biz.version) + "<br><br>" + esc(biz.disclaimer);
+  document.title = biz.title;
+  input.placeholder = "输入关键词搜索，例如：" + (biz.hot || []).slice(0, 3).join("、");
 
-                const turns = Math.floor(layerW / wireDia);
-                if (turns <= 0) {
-                    lines.push(`; 警告: 第${lay}层宽度不足, 跳过`);
-                    continue;
-                }
-                if (lay > 1) currentDir = -currentDir;
+  var hotBox = $("hot");
+  (biz.hot || []).forEach(function(word){
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.textContent = word;
+    b.addEventListener("click", function(){
+      input.value = word;
+      runSearch();
+      input.focus();
+    });
+    hotBox.appendChild(b);
+  });
 
-                lines.push(`; 层${lay} | 宽=${layerW}mm | 圈=${turns} | F=${layerF} 方向${currentDir>0?'→':'←'}`);
+  var tocHtml = "";
+  sections.forEach(function(sec){
+    tocHtml += '<div class="secblk"><div class="secname">' + esc(sec.t) + "</div>";
+    sec.items.forEach(function(it){
+      tocHtml += '<button class="qitem" data-n="' + it.n + '">' +
+        '<span class="n">' + it.n + "</span><span>" + esc(it.q) + '</span><span class="arrow">›</span></button>';
+    });
+    tocHtml += "</div>";
+  });
+  tocEl.innerHTML = tocHtml;
 
-                let batchX = 0, batchY = 0;
-                const flushBatch = () => {
-                    if (batchX !== 0 || batchY !== 0) {
-                        lines.push(`G1 X${batchX} Y${batchY.toFixed(5)} F${layerF}`);
-                        totalX += batchX;
-                        totalY += batchY;
-                        batchX = 0;
-                        batchY = 0;
-                    }
-                };
+  if (todoCount > 0){
+    var warn = $("warn");
+    warn.style.display = "block";
+    warn.innerHTML = "维护提示：本页还有 <b>" + todoCount + " 处待补数据</b>（带底色的“待填”标记）。补全后再对外发布效果最好。";
+  }
 
-                // 绕制一圈一圈移动
-                for (let t = 1; t <= turns; t++) {
-                    const yMove = currentDir * wireDia;
-                    batchX += 1;
-                    batchY += yMove;
+  function runSearch(){
+    var kw = input.value.trim().toLowerCase();
+    var hit = 0;
+    var blocks = tocEl.querySelectorAll(".secblk");
+    for (var i = 0; i < blocks.length; i++){
+      var items = blocks[i].querySelectorAll(".qitem"), shown = 0;
+      for (var j = 0; j < items.length; j++){
+        var it = INDEX[parseInt(items[j].getAttribute("data-n"), 10) - 1];
+        var hay = (it.q + " " + String(it.a).replace(/<[^>]+>/g, " ")).toLowerCase();
+        var ok = !kw || hay.indexOf(kw) >= 0;
+        items[j].hidden = !ok;
+        if (ok){ shown++; hit++; }
+      }
+      blocks[i].hidden = shown === 0;
+    }
+    $("clear").hidden = !kw;
+    $("tocTitle").textContent = kw ? ("搜索结果 · " + hit + " 条") : ("目录 · 共 " + INDEX.length + " 条问题");
+    hint.textContent = kw ? "" : ("共 " + INDEX.length + " 条问题，可按关键词搜索，也可直接点目录");
+    emptyEl.hidden = !(kw && hit === 0);
+  }
+  input.addEventListener("input", runSearch);
+  $("clear").addEventListener("click", function(){ input.value = ""; runSearch(); input.focus(); });
 
-                    let needPause = false;
-                    // Y轴宽度暂停 (第一层)
-                    if (pauseAtYWidth && lay === 1 && !firstLayerPauseTriggered) {
-                        const futureTotalY = totalY + batchY;
-                        const currentAbsY = Math.abs(totalY);
-                        const futureAbsY = Math.abs(futureTotalY);
-                        const targetAbsY = Math.abs(pauseYWidthValue);
-                        if ((currentAbsY < targetAbsY && futureAbsY >= targetAbsY) || 
-                            (Math.abs(futureTotalY) >= targetAbsY - 1e-6 && currentAbsY < targetAbsY)) {
-                            needPause = true;
-                            firstLayerPauseTriggered = true;
-                        }
-                    }
+  tocEl.addEventListener("click", function(e){
+    var t = e.target.closest ? e.target.closest(".qitem") : null;
+    if (t) location.hash = "#q" + t.getAttribute("data-n");
+  });
 
-                    if (needPause) {
-                        flushBatch();
-                        lines.push("", `; ----- Y轴暂停 ${pauseYWidthValue}mm -----`);
-                        const pauseLines = getPauseCode(pauseLayersFullStop);
-                        lines.push(...pauseLines);
-                        lines.push("; 确认后继续", "");
-                    }
-                }
-                flushBatch();
-                
-                // 层完成后的暂停（根据暂停层号列表）
-                if (pauseLayersArr.includes(lay)) {
-                    lines.push(`; ----- 层 ${lay} 完成，暂停 -----`);
-                    const pauseLines = getPauseCode(pauseLayersFullStop);
-                    lines.push(...pauseLines);
-                    lines.push(`; 层 ${lay} 暂停结束，继续下一层`);
-                    lines.push("");
-                }
-                
-                lines.push(`; 层${lay}完成 | 累计X=${totalX}圈 | Y=${totalY.toFixed(4)}mm`);
-            }
+  function showHome(){
+    qa.hidden = true; home.hidden = false; bar.hidden = true;
+    document.title = biz.title;
+    window.scrollTo(0, savedScroll || 0);
+  }
+  function showQA(num){
+    var it = INDEX[num - 1];
+    if (!it){ showHome(); return; }
+    if (!home.hidden) savedScroll = window.pageYOffset;
+    home.hidden = true; qa.hidden = false; bar.hidden = false;
+    $("crumbSec").textContent = it.sec.t;
+    $("qtitle").textContent = it.n + " · " + it.q;
+    $("ansBody").innerHTML = it.a;
+    document.title = it.q + " · " + biz.title;
+    var prev = $("prev"), next = $("next");
+    prev.disabled = it.n <= 1;
+    next.disabled = it.n >= INDEX.length;
+    prev.onclick = function(){ if (it.n > 1) location.hash = "#q" + (it.n - 1); };
+    next.onclick = function(){ if (it.n < INDEX.length) location.hash = "#q" + (it.n + 1); };
+    var sibs = it.sec.items.filter(function(x){ return x.n !== it.n; }).slice(0, 5);
+    $("sibTitle").textContent = it.sec.t + " · 其他问题";
+    $("sib").innerHTML = sibs.map(function(x){
+      return '<button class="qitem" data-n="' + x.n + '"><span class="n">' + x.n + "</span><span>" + esc(x.q) + '</span><span class="arrow">›</span></button>';
+    }).join("");
+    $("sibCard").hidden = sibs.length === 0;
+    window.scrollTo(0, 0);
+  }
+  $("sib").addEventListener("click", function(e){
+    var t = e.target.closest ? e.target.closest(".qitem") : null;
+    if (t) location.hash = "#q" + t.getAttribute("data-n");
+  });
+  $("back").addEventListener("click", function(){ location.hash = "#home"; });
+  $("back2").addEventListener("click", function(){ location.hash = "#home"; });
 
-            lines.push("; ==== 绕线完成 ====");
-            lines.push("G90");
-            // 结尾暂停保持不变：三行
-            lines.push("M0");
-            lines.push("$MD");
-            lines.push("M0");
-            if (endStayY && !isNaN(endStayY) && endStayY !== 0) {
-                lines.push(`G1 Y${endStayY.toFixed(3)} F2000 ; 移至结束Y位置`);
-            }
-            lines.push("M30");
-            return lines.join("\n");
-        }
+  function route(){
+    var m = /^#q(\d+)$/.exec(location.hash || "");
+    if (m) showQA(parseInt(m[1], 10));
+    else showHome();
+  }
+  window.addEventListener("hashchange", route);
 
-        function generateAndSave() {
-            hideStatus();
+  function toast(msg){
+    var t = $("toast");
+    t.textContent = msg;
+    t.className = "on";
+    setTimeout(function(){ t.className = ""; }, 1700);
+  }
+  function copyText(text, okMsg){
+    var done = function(){ toast(okMsg || "已复制"); };
+    if (navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(done, function(){ fallback(text, done); });
+    } else {
+      fallback(text, done);
+    }
+  }
+  function fallback(text, done){
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", "");
+    ta.style.position = "fixed"; ta.style.top = "-1000px";
+    document.body.appendChild(ta); ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    if (ok) done(); else toast("复制失败，请长按选择文本");
+  }
+  $("copyA").addEventListener("click", function(){
+    var m = /^#q(\d+)$/.exec(location.hash || "");
+    if (!m) return;
+    var it = INDEX[parseInt(m[1], 10) - 1];
+    var body = document.getElementById("ansBody");
+    copyText(it.q + "\n" + (body.innerText || body.textContent), "答案已复制");
+  });
+  $("copyL").addEventListener("click", function(){
+    if (location.protocol === "file:"){
+      toast("本地文件模式：上传成网址后此处才可复制");
+      return;
+    }
+    copyText(location.href.split("#")[0] + location.hash, "链接已复制");
+  });
 
-            const wireRaw = $('wdia').value;
-            const layersRaw = $('layers').value;
-            const widthRaw = $('width').value;
-            const feedRaw = $('feed').value;
+  var top = $("top");
+  window.addEventListener("scroll", function(){
+    top.style.display = window.pageYOffset > 500 ? "flex" : "none";
+  }, { passive: true });
+  top.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
 
-            if (!wireRaw || !layersRaw || !widthRaw || !feedRaw) {
-                setStatus("❌ 请完整填写线径、层数、宽度、速度", true);
-                return;
-            }
+  runSearch();
+  route();
+})();
 
-            const wireDia = parseFloat(wireRaw);
-            const totalLayers = parseInt(layersRaw);
-            const widthDef = parseFloat(widthRaw);
-            const feedDef = parseInt(feedRaw);
-
-            if (isNaN(wireDia) || wireDia <= 0) { setStatus("⚠️ 线径需为正数", true); return; }
-            if (isNaN(totalLayers) || totalLayers < 1) { setStatus("⚠️ 层数≥1", true); return; }
-            if (isNaN(widthDef) || widthDef <= 0) { setStatus("⚠️ 层宽度正数", true); return; }
-            if (isNaN(feedDef) || feedDef <= 0) { setStatus("⚠️ 速度正数", true); return; }
-
-            const pauseRaw = $('pauseLayers').value;
-            const specialRaw = $('special').value;
-            let endStayY = parseFloat($('endY').value);
-            if (isNaN(endStayY)) endStayY = 60;
-            const negativeStart = $('negStart').checked;
-            const pauseAtYWidth = $('pauseAtYWidth').checked;
-            const pauseYWidthValue = parseFloat($('pauseYWidth').value);
-            const pauseLayersFullStop = $('pauseLayersFullStop').checked;
-
-            if (pauseAtYWidth && (isNaN(pauseYWidthValue) || pauseYWidthValue <= 0)) {
-                setStatus("⚠️ 启用Y轴暂停时宽度须>0", true);
-                return;
-            }
-
-            const pauseLayersArr = parsePauseLayers(pauseRaw, totalLayers);
-            const specialMap = parseSpecialLayers(specialRaw);
-            
-            for (let layStr in specialMap) {
-                const lay = parseInt(layStr);
-                if (lay > totalLayers) {
-                    setStatus(`⚠️ 特殊层 ${lay} 超出总层数`, true);
-                    return;
-                }
-                if (specialMap[lay].width <= 0 || specialMap[lay].feed <= 0) {
-                    setStatus(`⚠️ 特殊层 ${lay} 参数无效`, true);
-                    return;
-                }
-                if (specialMap[lay].width / wireDia < 1) {
-                    setStatus(`⚠️ 特殊层 ${lay} 宽度小于线径`, true);
-                    return;
-                }
-            }
-
-            let filename = $('fname').value.trim();
-            if (filename === "") {
-                filename = autoGenerateFilename(wireDia, totalLayers, widthDef);
-                $('fname').value = filename.replace('.txt', '');
-            }
-            if (!filename.toLowerCase().endsWith('.txt')) filename += '.txt';
-
-            const genParams = {
-                wireDia,
-                totalLayers,
-                widthDef,
-                feedDef,
-                specialMap,
-                pauseLayersArr,
-                pauseLayersFullStop,
-                endStayY,
-                negativeStart,
-                pauseAtYWidth,
-                pauseYWidthValue: pauseAtYWidth ? pauseYWidthValue : 0,
-            };
-
-            try {
-                const gcodeText = buildGcode(genParams);
-                const blob = new Blob([gcodeText], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                setStatus(`✅ 已生成 "${filename}"`, false);
-            } catch (err) {
-                setStatus(`❗ 生成失败: ${err.message}`, true);
-            }
-        }
-
-        $('genBtn').addEventListener('click', generateAndSave);
-        $('wdia').addEventListener('input', updateFileNamePreview);
-        $('layers').addEventListener('input', updateFileNamePreview);
-        $('width').addEventListener('input', updateFileNamePreview);
-        
-        // 修复：删除空赋值，直接调用预览
-        updateFileNamePreview();
-        if (statusDiv) statusDiv.style.display = 'none';
-    })();
+function esc(s){
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 </script>
 </body>
 </html>
